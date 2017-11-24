@@ -15,7 +15,6 @@ const PLUGIN_NAME = 'remark-mermaid-simple';
 function visitCodeBlock(ast, vFile) {
   return visit(ast, 'code', (node, index, parent) => {
     const { lang, value, position } = node;
-    const destinationDir = getDestinationDir(vFile);
 
     // If this codeblock is not mermaid, bail.
     if (lang !== 'mermaid') {
