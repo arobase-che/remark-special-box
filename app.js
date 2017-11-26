@@ -1,45 +1,95 @@
 const visit = require('unist-util-visit');
 
 
-const PLUGIN_NAME = 'remark-mermaid-simple';
+const PLUGIN_NAME = 'remark-special-box';
 
 /**
- * Given the MDAST ast, look for all fenced codeblocks that have a language of
- * `mermaid` and pass that to mermaid.cli to render the image. Replaces the
- * codeblocks with an image of the rendered graph.
+ * Given the MDAST ast, look for all fenced Blockquote
  *
  * @param {object} ast
  * @param {vFile} vFile
  * @return {function}
  */
-function visitCodeBlock(ast, vFile) {
-  return visit(ast, 'code', (node, index, parent) => {
-    const { lang, value, position } = node;
+function visitBlockquote(ast, vFile) {
+  return visit(ast, 'blockquote', (node, index, parent) => {
+    const { position } = node;
 
-    // If this codeblock is not mermaid, bail.
-    if (lang !== 'mermaid') {
-      return node;
-    }
+    const firstNode = node.children[0]
 
-    const image = {
-      type: 'mermaid',
-      value: value,
-      data: {
-        hName: 'div',
-        hProperties: {
-          className: 'mermaid'
-        },
-        hChildren: [
-          {
-            type: 'text',
-            value: value
+    if( firstNode.type == 'paragraph' ) {
+      if( firstNode.children[0].type == 'text' ) {
+        if( firstNode.children[0].value.startsWith('!secret') ) {
+          node.type = 'div';
+          firstNode.children[0].value = firstNode.children[0].value.substr(7);
+          var sum = ""
+          if( firstNode.children[0].value.indexOf('\n') >= 0 ) {
+            sum = firstNode.children[0].value.substr( 0,
+              firstNode.children[0].value.indexOf('\n') );
+            firstNode.children[0].value = firstNode.children[0].value.substr( 
+              firstNode.children[0].value.indexOf('\n') );
+          } else {
+            sum = firstNode.children[0].value;
+            firstNode.children[0].value = "";
           }
-        ]
+
+          const secret = {
+            type: 'special-box-secret',
+            children: [ {
+                type: 'summary',
+                data: {
+                  hName: 'summary',
+                  hChildren: [{
+                    type:'text',
+                    value: sum ? sum : 'Spoiler'
+                  }]
+                }
+              },
+              node ],
+            data: {
+              hName: 'details',
+              hProperties: {
+                className: 'special-box secret'
+              },
+            }
+          };
+
+          parent.children.splice(index, 1, secret);
+
+          return node;
+        }else if( firstNode.children[0].value.startsWith('!information') ||
+            firstNode.children[0].value.startsWith('!good') ||
+            firstNode.children[0].value.startsWith('!bad') ||
+            firstNode.children[0].value.startsWith('!comment') ||
+            firstNode.children[0].value.startsWith('!attention') ||
+            firstNode.children[0].value.startsWith('!question') ) {
+          node.type = 'div';
+          var type = ""
+          if( firstNode.children[0].value.indexOf("\n") > 0) {
+            type = firstNode.children[0].value.substr(1, firstNode.children[0].value.indexOf("\n") );
+            firstNode.children[0].value = firstNode.children[0].value.substr( firstNode.children[0].value.indexOf("\n") );
+            console.log(type);
+          }else{
+            type = firstNode.children[0].value.substr(1)
+            firstNode.children[0].value = "";
+          }
+
+          const box = {
+            type: 'special-box-div',
+            children: [node],
+            data: {
+              hName: 'div',
+              hProperties: {
+                className: 'special-box ' + type
+              },
+            }
+          };
+
+          parent.children.splice(index, 1, box);
+
+          return node;
+        }
       }
-    };
-
-    parent.children.splice(index, 1, image);
-
+    }
     return node;
   });
 }
@@ -52,7 +102,7 @@ function visitCodeBlock(ast, vFile) {
  * @link https://github.com/vfile/vfile
  * @return {function}
  */
-function mermaid() {
+function box() {
   /**
    * @param {object} ast MDAST
    * @param {vFile} vFile
@@ -60,7 +110,7 @@ function mermaid() {
    * @return {object}
    */
   return function transformer(ast, vFile, next) {
-    visitCodeBlock(ast, vFile);
+    visitBlockquote(ast, vFile);
 
     if (typeof next === 'function') {
       return next(null, ast, vFile);
@@ -70,4 +120,4 @@ function mermaid() {
   };
 }
 
-module.exports = mermaid;
+module.exports = box;
