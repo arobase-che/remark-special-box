@@ -63,6 +63,12 @@ function visitBlockquote(ast, vFile) {
             firstNode.children[0].value.startsWith('!attention') ||
             firstNode.children[0].value.startsWith('!question') ) {
           node.type = 'div';
+          node.data = {
+            hName: 'div',
+            hProperties: {
+              className: 'special-box-content'
+            }
+          };
           var type = ""
           if( firstNode.children[0].value.indexOf("\n") > 0) {
             type = firstNode.children[0].value.substr(1, firstNode.children[0].value.indexOf("\n") );
