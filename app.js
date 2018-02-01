@@ -1,8 +1,5 @@
 const visit = require('unist-util-visit');
 
-
-const PLUGIN_NAME = 'remark-special-box';
-
 /**
  * Given the MDAST ast, look for all fenced Blockquote
  *
@@ -10,58 +7,56 @@ const PLUGIN_NAME = 'remark-special-box';
  * @param {vFile} vFile
  * @return {function}
  */
-function visitBlockquote(ast, vFile) {
+function visitBlockquote(ast) {
   return visit(ast, 'blockquote', (node, index, parent) => {
-    const { position } = node;
+    const firstNode = node.children[0];
 
-    const firstNode = node.children[0]
-
-    if( firstNode.type == 'paragraph' ) {
-      if( firstNode.children[0].type == 'text' ) {
-        if( firstNode.children[0].value.startsWith('!secret') ) {
+    if (firstNode.type === 'paragraph') {
+      if (firstNode.children[0].type === 'text') {
+        if (firstNode.children[0].value.startsWith('!secret')) {
           node.type = 'div';
           firstNode.children[0].value = firstNode.children[0].value.substr(7);
-          var sum = ""
-          if( firstNode.children[0].value.indexOf('\n') >= 0 ) {
-            sum = firstNode.children[0].value.substr( 0,
-              firstNode.children[0].value.indexOf('\n') );
-            firstNode.children[0].value = firstNode.children[0].value.substr( 
-              firstNode.children[0].value.indexOf('\n') );
+          let sum = '';
+          if (firstNode.children[0].value.indexOf('\n') >= 0) {
+            sum = firstNode.children[0].value.substr(0,
+              firstNode.children[0].value.indexOf('\n'));
+            firstNode.children[0].value = firstNode.children[0].value.substr(
+              firstNode.children[0].value.indexOf('\n'));
           } else {
             sum = firstNode.children[0].value;
-            firstNode.children[0].value = "";
+            firstNode.children[0].value = '';
           }
 
           const secret = {
             type: 'special-box-secret',
-            children: [ {
-                type: 'summary',
-                data: {
-                  hName: 'summary',
-                  hChildren: [{
-                    type:'text',
-                    value: sum ? sum : 'Spoiler'
-                  }]
-                }
-              },
-              node ],
+            children: [{
+              type: 'summary',
+              data: {
+                hName: 'summary',
+                hChildren: [{
+                  type: 'text',
+                  value: sum ? sum : 'Spoiler'
+                }]
+              }
+            },
+              node],
             data: {
               hName: 'details',
               hProperties: {
                 className: 'special-box secret'
-              },
+              }
             }
           };
 
           parent.children.splice(index, 1, secret);
 
           return node;
-        }else if( firstNode.children[0].value.startsWith('!information') ||
+        } else if (firstNode.children[0].value.startsWith('!information') ||
             firstNode.children[0].value.startsWith('!good') ||
             firstNode.children[0].value.startsWith('!bad') ||
             firstNode.children[0].value.startsWith('!comment') ||
             firstNode.children[0].value.startsWith('!attention') ||
-            firstNode.children[0].value.startsWith('!question') ) {
+            firstNode.children[0].value.startsWith('!question')) {
           node.type = 'div';
           node.data = {
             hName: 'div',
@@ -69,14 +64,14 @@ function visitBlockquote(ast, vFile) {
               className: 'special-box-content'
             }
           };
-          var type = ""
-          if( firstNode.children[0].value.indexOf("\n") > 0) {
-            type = firstNode.children[0].value.substr(1, firstNode.children[0].value.indexOf("\n") );
-            firstNode.children[0].value = firstNode.children[0].value.substr( firstNode.children[0].value.indexOf("\n") );
+          let type = '';
+          if (firstNode.children[0].value.indexOf('\n') > 0) {
+            type = firstNode.children[0].value.substr(1, firstNode.children[0].value.indexOf('\n'));
+            firstNode.children[0].value = firstNode.children[0].value.substr(firstNode.children[0].value.indexOf('\n'));
             console.log(type);
-          }else{
-            type = firstNode.children[0].value.substr(1)
-            firstNode.children[0].value = "";
+          } else {
+            type = firstNode.children[0].value.substr(1);
+            firstNode.children[0].value = '';
           }
 
           const box = {
@@ -86,7 +81,7 @@ function visitBlockquote(ast, vFile) {
               hName: 'div',
               hProperties: {
                 className: 'special-box ' + type
-              },
+              }
             }
           };
 
@@ -115,8 +110,8 @@ function box() {
    * @param {function} next
    * @return {object}
    */
-  return function transformer(ast, vFile, next) {
-    visitBlockquote(ast, vFile);
+  return function (ast, vFile, next) { // Transformer
+    visitBlockquote(ast);
 
     if (typeof next === 'function') {
       return next(null, ast, vFile);
