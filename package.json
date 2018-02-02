@@ -16,5 +16,11 @@
   "keywords": [
     "boxes",
     "remark"
-  ]
+  ],
+  "devDependencies": {
+    "xo": "^0.18.2"
+  },
+  "xo" : {
+    "space" : true
+  }
 }
