@@ -13,65 +13,67 @@ function visitBlockquote(ast) {
 
     if (firstNode.type === 'paragraph') {
       if (firstNode.children[0].type === 'text') {
-        if (firstNode.children[0].value.startsWith('!secret')) {
+        const firstChild = firstNode.children[0];
+        if (firstChild.value.startsWith('!secret')) {
           node.type = 'div';
-          firstNode.children[0].value = firstNode.children[0].value.substr(7);
+          firstChild.value = firstChild.value.substr(7);
           let sum = '';
-          if (firstNode.children[0].value.indexOf('\n') >= 0) {
-            sum = firstNode.children[0].value.substr(0,
-              firstNode.children[0].value.indexOf('\n'));
-            firstNode.children[0].value = firstNode.children[0].value.substr(
-              firstNode.children[0].value.indexOf('\n'));
+          if (firstChild.value.indexOf('\n') >= 0) {
+            sum = firstChild.value.substr(0,
+              firstChild.value.indexOf('\n'));
+            firstChild.value = firstChild.value.substr(
+              firstChild.value.indexOf('\n'));
           } else {
-            sum = firstNode.children[0].value;
-            firstNode.children[0].value = '';
+            sum = firstChild.value;
+            firstChild.value = '';
           }
 
           const secret = {
             type: 'special-box-secret',
-            children: [{
-              type: 'summary',
-              data: {
-                hName: 'summary',
-                hChildren: [{
-                  type: 'text',
-                  value: sum ? sum : 'Spoiler'
-                }]
-              }
-            },
-              node],
+            children: [
+              node,
+              {
+                type: 'summary',
+                data: {
+                  hName: 'summary',
+                  hChildren: [{
+                    type: 'text',
+                    value: sum || 'Spoiler',
+                  }],
+                },
+              },
+            ],
             data: {
               hName: 'details',
               hProperties: {
-                className: 'special-box secret'
-              }
-            }
+                className: 'special-box secret',
+              },
+            },
           };
 
           parent.children.splice(index, 1, secret);
 
           return node;
-        } else if (firstNode.children[0].value.startsWith('!information') ||
-            firstNode.children[0].value.startsWith('!good') ||
-            firstNode.children[0].value.startsWith('!bad') ||
-            firstNode.children[0].value.startsWith('!comment') ||
-            firstNode.children[0].value.startsWith('!attention') ||
-            firstNode.children[0].value.startsWith('!question')) {
+        } else if (firstChild.value.startsWith('!information') ||
+            firstChild.value.startsWith('!good') ||
+            firstChild.value.startsWith('!bad') ||
+            firstChild.value.startsWith('!comment') ||
+            firstChild.value.startsWith('!attention') ||
+            firstChild.value.startsWith('!question')) {
           node.type = 'div';
           node.data = {
             hName: 'div',
             hProperties: {
-              className: 'special-box-content'
-            }
+              className: 'special-box-content',
+            },
           };
           let type = '';
-          if (firstNode.children[0].value.indexOf('\n') > 0) {
-            type = firstNode.children[0].value.substr(1, firstNode.children[0].value.indexOf('\n'));
-            firstNode.children[0].value = firstNode.children[0].value.substr(firstNode.children[0].value.indexOf('\n'));
-            console.log(type);
+          if (firstChild.value.indexOf('\n') > 0) {
+            type = firstChild.value.substr(1, firstChild.value.indexOf('\n'));
+            firstChild.value = firstChild.value.substr(firstChild.value.indexOf('\n'));
           } else {
-            type = firstNode.children[0].value.substr(1);
-            firstNode.children[0].value = '';
+            type = firstChild.value.substr(1);
+            firstChild.value = '';
           }
 
           const box = {
@@ -80,9 +82,9 @@ function visitBlockquote(ast) {
             data: {
               hName: 'div',
               hProperties: {
-                className: 'special-box ' + type
-              }
-            }
+                className: `special-box ${type}`,
+              },
+            },
           };
 
           parent.children.splice(index, 1, box);
