@@ -36,4 +36,3 @@ test('question', t => {
   const {contents} = renderRaw('>!question\nWhat does the 🦊 say ?');
   t.snapshot(contents);
 });
-
