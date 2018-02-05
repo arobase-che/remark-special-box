@@ -4,6 +4,8 @@
   "description": "A remark plugin for Markdown that parse special blox",
   "main": "app.js",
   "scripts": {
+    "pretest": "eslint .",
+    "test": "ava",
     "start": "node app.js"
   },
   "dependencies": {
@@ -16,10 +18,16 @@
     "remark"
   ],
   "devDependencies": {
+    "ava": "^0.25.0",
+    "rehype-raw": "^2.0.0",
+    "rehype-stringify": "^3.0.0",
+    "remark-parse": "^5.0.0",
+    "remark-rehype": "^3.0.0",
+    "unified": "^6.1.6",
     "xo": "^0.18.2"
   },
-  "xo" : {
-    "space" : true,
+  "xo": {
+    "space": true,
     "rules": {
       "comma-dangle": [
         "error",
