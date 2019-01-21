@@ -4,7 +4,7 @@
   "description": "A remark plugin for markdown that parse special blox",
   "main": "dist/index.js",
   "scripts": {
-    "pretest": "xo",
+    "pretest": "xo && npm run-script prepare",
     "prepare": "del-cli dist && cross-env BABEL_ENV=production babel src --out-dir dist",
     "test": "ava"
   },

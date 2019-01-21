@@ -13,10 +13,12 @@ function visitBlockquote(ast) {
 
     if (firstNode.type === 'paragraph') {
       if (firstNode.children[0].type === 'text') {
+
         const firstChild = firstNode.children[0];
         if (firstChild.value.startsWith('!secret')) {
           node.type = 'div';
           firstChild.value = firstChild.value.substr(7);
+
           let sum = '';
           if (firstChild.value.indexOf('\n') >= 0) {
             sum = firstChild.value.substr(0,
@@ -52,13 +54,11 @@ function visitBlockquote(ast) {
           };
 
           parent.children.splice(index, 1, secret);
-
-          return node;
-        } else if (firstChild.value.startsWith('!information') ||
-            firstChild.value.startsWith('!good') ||
-            firstChild.value.startsWith('!bad') ||
-            firstChild.value.startsWith('!comment') ||
-            firstChild.value.startsWith('!attention') ||
+        } else if (firstChild.value.startsWith('!information\n') ||
+            firstChild.value.startsWith('!good\n') ||
+            firstChild.value.startsWith('!bad\n') ||
+            firstChild.value.startsWith('!comment\n') ||
+            firstChild.value.startsWith('!attention\n') ||
             firstChild.value.startsWith('!question')) {
           node.type = 'div';
           node.data = {
@@ -67,10 +67,11 @@ function visitBlockquote(ast) {
               className: 'special-box-content',
             },
           };
+
           let type = '';
           if (firstChild.value.indexOf('\n') > 0) {
             type = firstChild.value.substr(1, firstChild.value.indexOf('\n'));
-            firstChild.value = firstChild.value.substr(firstChild.value.indexOf('\n'));
+            firstChild.value = firstChild.value.substr(firstChild.value.indexOf('\n') + 1);
           } else {
             type = firstChild.value.substr(1);
             firstChild.value = '';
@@ -88,8 +89,6 @@ function visitBlockquote(ast) {
           };
 
           parent.children.splice(index, 1, box);
-
-          return node;
         }
       }
     }
